@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Form</title>
+    </head>
+
+    <body>
+        <fieldset style = "width: 30%;">
+        <table>
+        <form>   
+            <legend>Contact information:</legend>
+            <tr>
+                <td>
+                    <label for="fname">First Name:</label>
+                    <input type="text" id="fname" name="fname" placeholder="First name">
+                    </td>
+                    <td>
+                        <labe for="checkbox_email">Preferred contact method:</labe>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="lname">Last Name:</label>
+                    <input type="text" id="lname" name="lname" placeholder="Last name">
+                </td>
+                <td>
+                    <input type="checkbox" id="checkbox_email" name="checkbox_email"> Email
+                </td>
+                <tr>
+                <td>
+                    <label for="email">Email:</label>
+                    <input type="text" id="email" name="email" placeholder="Email">
+                </td>
+                <td><input type="checkbox" id="checkbox_telephone" name="checkbox_telephone">Telephone
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="telephone">Telephone:</label>
+                    <input type="text" id="telephone" name="telephone" placeholder="Telephone">
+                </td>
+            </tr>
+        </table>
+        </fieldset>
+        <fieldset style="width: 30%;">
+        <table>
+            <legend>Feedback:</legend>
+            <tr>
+                <td>
+                    <input type="text" id="subject" name="subject" placeholder="Message subject">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <textarea name="message" rows="15" cols="50"></textarea></textarea>
+                </td>
+            </tr>    
+            <tr>
+                <td>
+                    <label for="file">Attach a file:</label>
+                    <input type="file" id="file" name="file" placeholder="Browse...">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <hr>
+                    <input type="submit" id="submit" name="submit" placeholder="Send">
+                </td>
+            </tr>
+        </table>
+        </fieldset>
+        </form>
+    </body>
+
+</html>

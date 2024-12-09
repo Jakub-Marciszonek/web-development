@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Personal code handler</title>
+    <script>
+        // ^ checks beggining of the str
+        // \d = digits number inside{} says how many char is considered
+        // \- is used cuz char "-" without \ mean from to exmpl 0-9
+        const pattern = /^(\d{6})([+\-A-Z])(\d{3})([A-Z0-9])$/;
+        const CDate = new Date()
+
+        function Check(){
+            let CodeInp = document.getElementById("CodeInp").value.trim();
+
+            // match lists matching scheme if there is none it return null
+            Match = CodeInp.match(pattern);
+
+            if (Match === null) {
+                document.getElementById("CheckOut").innerText = 
+                "Invalid format"
+                return;
+            }
+            
+            const [_, DatePart, Separator, PersonalNumber, ControlChar] = Match;
+            
+            const Day = parseInt(DatePart.substring(0, 2), 10);
+            const Month = parseInt(DatePart.substring(2, 4), 10);
+            const Year = parseInt(DatePart.substring(4, 6), 10);
+            let Year2;
+            
+            if (Separator === "+") {
+                Year2 = 1800 + Year;
+            } else if (Separator === "-" || Separator === "Y") {
+                Year2 = 1900 + Year;
+            } else if (Separator === "A") {
+                Year2 = 2000 + Year;
+            } else {
+                document.getElementById("CheckOut").innerText = 
+                "Invalid century separator"
+                return;
+            }
+
+            const DaysInMonth = new Date(Year, Month, 0).getDate();
+
+            if (Month < 1 || Month > 12) {
+                document.getElementById("CheckOut").innerText = 
+                "Invalid month"
+                return;
+            }
+
+            if (Day < 1 || Day > DaysInMonth) {
+                document.getElementById("CheckOut").innerText =
+                "Invalid day"
+                return;
+            }
+
+            const PN = parseInt(PersonalNumber, 10);
+            if (PN < 2 || PN > 899) {
+                document.getElementById("CheckOut").innerText =
+                "Invalid personal number"
+                return;
+            }
+            
+            const Gender = PN % 2 === 0 ? "Female": "Male";
+
+            let BirthDate = new Date(Year, Month -1, Day)
+            let Age = CDate.getFullYear() - Year2
+            let age = Age
+            let M = CDate.getMonth() - BirthDate.getMonth();
+            let D = CDate.getDate() - BirthDate.getDate();
+
+            if (M < 0 || (M === 0 && D < 0)) {
+                Age--;
+                M += 12;
+            }
+
+            if (D < 0) {
+                M--;
+                let PMonth = new Date(CDate.getFullYear(),
+                CDate.getMonth(),0);
+                D += PMonth.getDate();
+            }
+
+            document.getElementById("CheckOut").innerText =
+            `Personal code: \nValid: True\nSex: ${Gender}\nAge: ${age}
+            Specificly: ${Age} years ${M} months ${D} days`
+            return;
+
+        }
+
+        function Generator() {
+            let BirthInp = document.getElementById("BDate").value.trim();
+            let SexInp = document.getElementById("Male").checked ? 
+            "M" : "F";
+
+            let DatePart = BirthInp.substring(8, 10)
+            .concat(BirthInp.substring(5, 7)).concat(2, 4);
+
+            let Separator
+            if (BirthInp.substring(0, 2) === "20") {
+                Separator = "A";
+            } else if (BirthInp.substring(0, 2) === "19") {
+                int = Math.floor(Math.random() * 2);
+                if (int === 0){
+                    Separator = "-";
+                } else {
+                    Separator = "Y";
+                }
+            } else {
+                Separator = "+";
+            }
+
+            const Char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+            const Num = Math.floor(Math.random() * (899 - 2 + 1)) + 2;
+            Num.toString().padStart(3, "0");
+            const RandomIndex = Math.floor(Math.random() * Char.length);
+
+            let PersonalNumber;
+            PersonalNumber = DatePart.concat(Separator)
+            .concat(Num).concat(Char[RandomIndex])
+
+            document.getElementById("GeneratorOut").innerText =
+        PersonalNumber
+        }
+    </script>
+</head>
+
+<body>
+    <h1 id="id"></h1>
+    <h1>Personal code check</h1>
+
+    <form>
+        <input type="text" placeholder="Insert Pesronal code" id="CodeInp">
+        <button type="button" onclick="Check()">Check</button>
+        <p id="CheckOut"></p>
+    </form>
+
+    <h1>Personal code generator</h1>
+
+    <form>
+        <label for="BDate">Birthdate</label>
+        <input type="date" id="BDate" min="1800-01-01">
+        <input type="radio" id="Male" name="Sex">
+        <label for="Male">Male</label>
+        <input type="radio" id="Female" name="Sex"">
+        <label for="Female">Female</label>
+        <button type="button" onclick="Generator()">Generate</button>
+        <p id="GeneratorOut"></p>
+    </form>
+
+</body>
+</html>

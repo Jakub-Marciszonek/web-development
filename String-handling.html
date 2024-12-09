@@ -1,0 +1,189 @@
+Phạm Ngoạc
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Personal Identity Code Validator and Generator</title>
+</head>
+<body>
+    <!-- Section for validating personal identity codes -->
+    <h2>Correctness of the Personal Identity Number</h2>
+    <form>
+        <!-- Input field to enter the PIC for validation -->
+        <input type="text" id="validateInput" placeholder="Enter ID" required>
+        <button type="button" onclick="validatePIC()">Validate</button>
+    </form>
+    <!-- Result of the validation -->
+    <p id="validateResult"></p>
+
+    <!-- Section for generating personal identity codes -->
+    <h2>Generate Personal Identity Number with:</h2>
+
+    <!-- Option to generate a PIC with a random individual part -->
+    <h3>Random Individual Part</h3>
+    <form>
+        <input type="text" id="dobInput" placeholder="Enter DOB (ddmmyy)" required>
+        <input type="text" id="centuryInput" placeholder="Enter Century (+/-/A)" required>
+        <input type="text" id="genderInput" placeholder="Enter Gender (M/F)" required>
+        <button type="button" onclick="generateRandomPIC()">Generate</button>
+    </form>
+    <!-- Display the generated PIC -->
+    <p id="generateResult"></p>
+
+    <!-- Option to generate a PIC with a manual individual part -->
+    <h3>Manual Individual Part</h3>
+    <form>
+        <input type="text" id="manualDobInput" placeholder="Enter DOB (ddmmyy)" required>
+        <input type="text" id="manualCenturyInput" placeholder="Enter Century (+/-/A)" required>
+        <input type="text" id="manualGenderInput" placeholder="Enter Gender (M/F)" required>
+        <input type="text" id="manualIndividualInput" placeholder="Enter Individual Part (2-899)" required>
+        <button type="button" onclick="generateManualPIC()">Generate</button>
+    </form>
+    <!-- Display the generated PIC -->
+    <p id="manualGenerateResult"></p>
+
+    <script>
+        // Constant string for mapping check characters
+        const CHECK_CHARACTERS = "0123456789ABCDEFHJKLMNPRSTUVWXY";
+
+        // Function to validate a personal identity code
+        function validatePIC() {
+            const input = document.getElementById('validateInput').value.trim();
+
+            // Ensure the input is the correct length
+            if (input.length !== 11) {
+                document.getElementById('validateResult').textContent = "Invalid format: must be 11 characters.";
+                return;
+            }
+
+            // Extract different parts of the PIC
+            const datePart = input.slice(0, 6); // Birth date
+            const separator = input[6];        // Century symbol
+            const individualPart = input.slice(7, 10); // Individual part
+            const checkChar = input[10];       // Check character
+
+            // Determine the century based on the separator
+            let century;
+            if (separator === '-') {
+                century = 1900;
+            } else if (separator === '+') {
+                century = 1800;
+            } else if (separator === 'A') {
+                century = 2000;
+            } else {
+                document.getElementById('validateResult').textContent = "Invalid separator.";
+                return;
+            }
+
+            // Validate the date part
+            const day = parseInt(datePart.slice(0, 2), 10);
+            const month = parseInt(datePart.slice(2, 4), 10);
+            const year = century + parseInt(datePart.slice(4), 10);
+            const birthDate = new Date(year, month - 1, day);
+
+            if (
+                birthDate.getDate() !== day || 
+                birthDate.getMonth() + 1 !== month || 
+                birthDate.getFullYear() !== year
+            ) {
+                document.getElementById('validateResult').textContent = "Invalid date.";
+                return;
+            }
+
+            // Validate the check character
+            const checkNumber = parseInt(datePart + individualPart, 10) % 31;
+            if (CHECK_CHARACTERS[checkNumber] !== checkChar) {
+                document.getElementById('validateResult').textContent = "Invalid check character.";
+                return;
+            }
+
+            // Determine the gender based on the individual part
+            const gender = parseInt(individualPart, 10) % 2 === 0 ? "Female" : "Male";
+
+            // Calculate the age of the person
+            const today = new Date();
+            let age = today.getFullYear() - year;
+            if (today.getMonth() + 1 < month || (today.getMonth() + 1 === month && today.getDate() < day)) {
+                age--;
+            }
+
+            document.getElementById('validateResult').textContent =
+                Valid! Gender: ${gender}, Age: ${age};
+        }
+
+        // Function to generate a PIC with a random individual part
+        function generateRandomPIC() {
+            const dob = document.getElementById('dobInput').value.trim();
+            const centurySymbol = document.getElementById('centuryInput').value.trim();
+            const gender = document.getElementById('genderInput').value.trim().toUpperCase();
+
+            if (!validateCommonInputs(dob, centurySymbol, gender)) return;
+
+            const individualPart = generateIndividualPart(gender);
+            const generatedID = generatePIC(dob, centurySymbol, individualPart);
+            document.getElementById('generateResult').textContent = Generated ID: ${generatedID};
+        }
+
+        // Function to generate a PIC with a manually entered individual part
+        function generateManualPIC() {
+            const dob = document.getElementById('manualDobInput').value.trim();
+            const centurySymbol = document.getElementById('manualCenturyInput').value.trim();
+            const gender = document.getElementById('manualGenderInput').value.trim().toUpperCase();
+            const manualIndividualPart = document.getElementById('manualIndividualInput').value.trim();
+
+            if (!validateCommonInputs(dob, centurySymbol, gender)) return;
+
+            // Validate the manual individual part
+            const individualPart = parseInt(manualIndividualPart, 10);
+            if (isNaN(individualPart) || individualPart < 2 || individualPart > 899) {
+                document.getElementById('manualGenerateResult').textContent = "Invalid individual part: must be between 2 and 899.";
+                return;
+            }
+
+            // Ensure the individual part matches the gender
+            if ((gender === 'F' && individualPart % 2 !== 0) || (gender === 'M' && individualPart % 2 === 0)) {
+                document.getElementById('manualGenerateResult').textContent = "Invalid individual part: does not match the gender.";
+                return;
+            }
+
+            const generatedID = generatePIC(dob, centurySymbol, manualIndividualPart.padStart(3, '0'));
+            document.getElementById('manualGenerateResult').textContent = Generated ID: ${generatedID};
+        }
+
+        // Helper function to validate common inputs for PIC generation
+        function validateCommonInputs(dob, centurySymbol, gender) {
+            if (dob.length !== 6 || !/^\d+$/.test(dob)) {
+                alert("Invalid DOB: must be 6 digits.");
+                return false;
+            }
+
+            if (!['+', '-', 'A'].includes(centurySymbol)) {
+                alert("Invalid century: must be +, -, or A.");
+                return false;
+            }
+
+            if (!['M', 'F'].includes(gender)) {
+                alert("Invalid gender: must be M or F.");
+                return false;
+            }
+
+            return true;
+        }
+
+        // Helper function to generate a random individual part
+        function generateIndividualPart(gender) {
+            let num;
+            do {
+                num = Math.floor(Math.random() * (899 - 2 + 1)) + 2; // Random number between 2 and 899
+            } while ((gender === 'F' && num % 2 !== 0) || (gender === 'M' && num % 2 === 0));
+            return num.toString().padStart(3, '0');
+        }
+
+        // Helper function to assemble the complete PIC
+        function generatePIC(dob, centurySymbol, individualPart) {
+            const checkNumber = parseInt(dob + individualPart, 10) % 31; // Calculate the check number
+            const checkChar = CHECK_CHARACTERS[checkNumber]; // Get the check character
+            return ${dob}${centurySymbol}${individualPart}${checkChar};
+        }
+    </script>
+</body>
+</html>
